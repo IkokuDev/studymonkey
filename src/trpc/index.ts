@@ -1,5 +1,5 @@
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/dist/types/server';
-import {publicProcedure, router} from './trpc'
+import {getKindeServerSession} from "@kinde-oss/kinde-auth-nextjs/server";
+import {privateProcedure, publicProcedure, router} from './trpc'
 import { TRPCError } from '@trpc/server';
 import { db } from '@/db';
 import {PrismaClient} from "@prisma/client";
@@ -36,6 +36,17 @@ export const appRouter = router({
       return { success: true }
         
     }),
+    getUserFiles: privateProcedure.query(async ({ctx})=>{
+      const{userId} = ctx
+
+      return await db.file.findMany({
+        where:{
+          userId
+        }
+      })
+
+
+    })
 });
 
 export type AppRouter = typeof appRouter;

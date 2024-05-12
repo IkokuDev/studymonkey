@@ -12,9 +12,11 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String      @id @unique
   kindeId    String  @unique //matches kinde user id
   email String @unique
+
+  File    File[]
 
   firstName              String?   @unique @map(name: "first_name")
   lastName               String?   @unique @map(name: "last_name")
@@ -22,4 +24,28 @@ model User {
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
   stripePriceId          String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
+}
+
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  FAILED
+  SUCCESS
+}
+
+model File {
+  id   String @id @default(cuid())
+  name String
+
+  uploadStatus UploadStatus @default(PENDING)
+
+  url      String
+  key      String
+  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
 }
