@@ -3,6 +3,7 @@ import {privateProcedure, publicProcedure, router} from './trpc'
 import { TRPCError } from '@trpc/server';
 import { db } from '@/db';
 import {PrismaClient} from "@prisma/client";
+import {z} from "zod"
 
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error']
@@ -46,7 +47,26 @@ export const appRouter = router({
       })
 
 
+    }),
+    deleteFile: privateProcedure.input(z.object({id: z.string()})
+  ).mutation(async({ctx, input})=>{
+    const {userId} = ctx
+
+    const file = await db.file.findFirst({
+      where :{
+        id: input.id,
+        userId
+      },
     })
+
+    if(!file) throw new TRPCError({code: "NOT_FOUND"})
+      await db.file.delete({
+        where: {
+          id: input.id,
+        }
+    })
+    return file
+  }),
 });
 
 export type AppRouter = typeof appRouter;
